@@ -1,0 +1,22 @@
+<template name="demoLayout">
+    {{> yield }}
+</template>
+
+<template name="demoTest">
+    {{> recordButton }}
+    {{> playButton }}
+</template>
+
+<template name="recordButton">
+    <button id="record">
+        <i class="fa fa-circle"></i>
+        <span class="tx">Record</span>
+    </button>
+</template>
+
+<template name="playButton">
+    <button id="play">
+        <i class="fa fa-play"></i>
+        <span class="tx">Play</span>
+    </button>
+</template>

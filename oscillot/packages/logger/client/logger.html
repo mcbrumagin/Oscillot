@@ -1,0 +1,14 @@
+<template name="logs">
+    <ul class="logs">
+        {{#each log}}
+            {{> logItem }}
+        {{/each}}
+    </ul>
+</template>
+
+<template name="logItem">
+    <li class="log {{type}}">
+        <span class="date">{{date}}</span>
+        <pre class="content">{{content}}</pre>
+    </li>
+</template>
