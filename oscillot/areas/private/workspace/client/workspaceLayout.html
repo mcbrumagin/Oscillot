@@ -1,3 +1,19 @@
 <template name="workspaceLayout">
-    
+    <div id="controls">
+        <img id="record" src="/img/mic128.png">
+		<canvas id="analyser" width="1024" height="500"></canvas>
+		
+	</div>
+    {{> yield }}
+</template>
+
+<template name="workspace">
+    <h2>{{workspace.title}}</h2>
+    <p>{{workspace.description}}</p>
+    {{#each clips}}
+        <div class="clip">
+            <canvas class="wavedisplay" data-clip-id="{{_id}}"></canvas>
+            <!-- TODO: add to recorded clip view <a id="save" href="#"><img src="/img/save.svg"></a>-->
+        </div>
+    {{/each}}
 </template>

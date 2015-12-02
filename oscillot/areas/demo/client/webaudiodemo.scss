@@ -1,4 +1,5 @@
 
+/*
 html { overflow: hidden; }
 body { 
 	font: 14pt Arial, sans-serif; 
@@ -47,3 +48,42 @@ canvas {
 	#controls { flex-direction: column; height: 100%; width: 10%;}
 	#viz { height: 100%; width: 90%;}
 }
+*/
+
+html {
+	font-size: 62.5%;
+}
+
+$canvasBg: #000;
+
+canvas {
+	margin: 0 auto;
+	padding: 0;
+	display: inline-block;
+	background: $canvasBg;
+	width: 100%;
+	height: 20rem;
+	box-shadow: 0px 0px 10px rgba(150,150,255,.75);
+}
+
+#controls {
+	position: relative;
+}
+
+#record {
+	position: absolute;
+	top: 25%;
+	right: 0;
+	height: 50%;
+}
+
+#record.recording {
+	background: red;
+	background: -webkit-radial-gradient(center, ellipse cover, rgba(255,0,0,.5) 0%, $canvasBg 75%, $canvasBg 100%, rgba(125,185,232,.5) 100%);
+	background:    -moz-radial-gradient(center, ellipse cover, rgba(255,0,0,.5) 0%, $canvasBg 75%, $canvasBg 100%, rgba(125,185,232,.5) 100%);
+	background:         radial-gradient(center, ellipse cover, rgba(255,0,0,.5) 0%, $canvasBg 75%, $canvasBg 100%, rgba(125,185,232,.5) 100%);
+}
+
+#save, #save img { height: 10vh; }
+#save { opacity: 0.25;}
+#save[download] { opacity: 1;}

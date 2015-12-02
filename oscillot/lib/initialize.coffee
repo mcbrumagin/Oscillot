@@ -1,1 +1,1 @@
-do Logger.enable
+do Logger.disable

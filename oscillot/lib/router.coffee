@@ -1,7 +1,6 @@
 @DefaultController = RouteController.extend
   loadingTemplate: 'loading'
   layoutTemplate: 'layout'
-  onBeforeAction: -> Logger.console.log @
   
 Router.configure controller: 'DefaultController'
 
@@ -22,7 +21,7 @@ Router.configure controller: 'DefaultController'
 
 # Private routes
 @PrivateController = DefaultController.extend
-  onBeforeAction: -> Logger.console.log @
+  layoutTemplate: 'privateLayout'
   
 @WorkspaceController = PrivateController.extend
   layoutTemplate: 'workspaceLayout'

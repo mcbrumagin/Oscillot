@@ -1,6 +1,6 @@
 (function(window){
 
-  var WORKER_PATH = 'js/recorderjs/recorderWorker.js';
+  var WORKER_PATH = '/js/recorderjs/recorderWorker.js';
 
   var Recorder = function(source, cfg){
     var config = cfg || {};
@@ -55,6 +55,36 @@
 
     this.getBuffer = function(cb) {
       currCallback = cb || config.callback;
+      
+      cbcopy = currCallback
+      currCallback = function (buffers) {
+        //console.log('insertClip', Workspace._id, fileInfo.file.slice(0,100))
+        arrs = []
+        for (var i = 0; i < buffers.length; i++) {
+          arrs.push([])
+          for (prop in buffers[i]) arrs[i].push(buffers[i][prop])
+        }
+        
+        console.time('insertClip')
+        Meteor.call('insertClip', Workspace._id, arrs, function (err, res) {
+          
+          var done = function () {
+            console.timeEnd('insertClip')
+            cbcopy(buffers)
+          }
+          
+          if (err) {
+            console.error(err)
+            done()
+          }
+          else {
+            console.log(res)
+            window.clipId = res
+            Meteor.subscribe('workspace', Workspace.name, done)
+          }
+        })
+      }
+      
       worker.postMessage({ command: 'getBuffer' })
     }
 
@@ -68,7 +98,7 @@
       });
     }
 
-    worker.onmessage = function(e){
+    worker.onmessage = function(e) {
       var blob = e.data;
       currCallback(blob);
     }
@@ -77,14 +107,57 @@
     this.node.connect(this.context.destination);    //this should not be necessary
   };
 
-  Recorder.forceDownload = function(blob, filename){
-    var url = (window.URL || window.webkitURL).createObjectURL(blob);
-    var link = window.document.createElement('a');
-    link.href = url;
-    link.download = filename || 'output.wav';
-    var click = document.createEvent("Event");
-    click.initEvent("click", true, true);
-    return link;
+  var BinaryFileReader = {
+    read: function(file, callback){
+      var reader = new FileReader;
+  
+      var fileInfo = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        file: null
+      }
+  
+      reader.onload = function(){
+        fileInfo.file = new Float32Array(reader.result);
+        callback(null, fileInfo);
+      }
+      reader.onerror = function(){
+        callback(reader.error);
+      }
+  
+      reader.readAsArrayBuffer(file);
+    }
+  }
+  
+  var readBlob = function (blob, callback) {
+    var reader = new FileReader()
+    reader.addEventListener("loadend", function() { callback(reader.result) })
+    reader.readAsArrayBuffer(blob)
+  }
+  
+  Recorder.forceDownload = function(blob, filename) {
+    
+    //var url = (window.URL || window.webkitURL).createObjectURL(blob);
+    
+    BinaryFileReader.read(blob, function(err, fileInfo) {
+      if (err) console.error(err)
+      else console.log('insertClip', Workspace._id, fileInfo.file.slice(0,100))
+      Meteor.call('insertClip', Workspace._id, fileInfo, function (err, res) {
+        if (err) console.error(err)
+        else {
+          console.log(res)
+          Meteor.subscribe('workspace', Workspace.name)
+        }
+      })
+    })
+    
+    //var link = window.document.createElement('a');
+    //link.href = url;
+    //link.download = filename || 'output.wav';
+    //var click = document.createEvent("Event");
+    //click.initEvent("click", true, true);
+    //return link;
   }
 
   window.Recorder = Recorder;

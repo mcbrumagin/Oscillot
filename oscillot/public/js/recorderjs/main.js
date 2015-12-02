@@ -39,43 +39,51 @@ function saveAudio() {
 }
 
 function gotBuffers( buffers ) {
-    console.log(JSON.stringify(buffers));
-    var canvas = document.getElementById( "wavedisplay" );
-
-    drawBuffer( canvas.width, canvas.height, canvas.getContext('2d'), buffers[0] );
-
-    // the ONLY time gotBuffers is called is right after a new recording is completed - 
-    // so here's where we should set up the download.
-    audioRecorder.exportWAV( doneEncoding );
+    setTimeout(function () {
+        //console.log(JSON.stringify(buffers));
+        var canvas = document.querySelector('.wavedisplay[data-clip-id=' + window.clipId + ']')
+        canvas = canvas || document.createElement('canvas')
+        
+        canvas.width = window.innerWidth
+        canvas.height = 200
+        drawBuffer(canvas, buffers[0])
+    
+        // the ONLY time gotBuffers is called is right after a new recording is completed - 
+        // so here's where we should set up the download.
+        
+        //Recorder.forceDownload( buffers[0], "myRecording" + ((recIndex<10)?"0":"") + recIndex + ".wav", "#save")
+        audioRecorder.exportWAV(doneEncoding)
+    }, 50)
 }
 
 function doneEncoding( blob ) {
-    var link = Recorder.forceDownload( blob, "myRecording" + ((recIndex<10)?"0":"") + recIndex + ".wav", "#save");
-    link.id = "save";
-    link.style.opacity = 1;
-    var elem = document.getElementById('save');
-    var parent = elem.parentElement;
-    var img = elem.children[0];
-    parent.removeChild(elem);
-    link.appendChild(img);
-    parent.appendChild(link);
-    recIndex++;
+    //var link = Recorder.forceDownload( blob, "myRecording" + ((recIndex<10)?"0":"") + recIndex + ".wav", "#save")
+    //link.id = "save"
+    //link.style.opacity = 1
+    //var elem = document.getElementById('save')
+    //var parent = elem.parentElement
+    //var img = elem.children[0]
+    //parent.removeChild(elem)
+    //link.appendChild(img)
+    //parent.appendChild(link)
+    //recIndex++
 }
 
 function toggleRecording( elem ) {
-    console.log(JSON.stringify(elem))
+    
+    //if (!elem || JSON.stringify(elem) === '{}') throw new Error('Requires an html element.')
+    //console.log(elem.className)
     if (elem.classList.contains("recording")) {
         // stop recording
-        audioRecorder.stop();
-        elem.classList.remove("recording");
-        audioRecorder.getBuffer( gotBuffers );
+        audioRecorder.stop()
+        elem.classList.remove("recording")
+        audioRecorder.getBuffer(gotBuffers)
     } else {
         // start recording
-        if (!audioRecorder)
-            return;
-        elem.classList.add("recording");
-        audioRecorder.clear();
-        audioRecorder.record();
+        if (!audioRecorder) return
+        elem.classList.add("recording")
+        audioRecorder.clear()
+        audioRecorder.record()
     }
 }
 
@@ -107,8 +115,9 @@ function updateAnalysers(time) {
     var numBars = Math.round(canvasWidth / SPACING);
     var freqByteData = new Uint8Array(analyserNode.frequencyBinCount);
 
-    analyserNode.getByteFrequencyData(freqByteData); 
-
+    // TODO: Test out windowing functions / pitch shifting
+    analyserNode.getByteFrequencyData(freqByteData);
+    
     analyserContext.clearRect(0, 0, canvasWidth, canvasHeight);
     analyserContext.fillStyle = '#F6D565';
     analyserContext.lineCap = 'round';
@@ -152,7 +161,7 @@ function gotStream(stream) {
     audioInput = realAudioInput;
     audioInput.connect(inputPoint);
 
-//    audioInput = convertToMono( input );
+    // audioInput = convertToMono( input );
 
     analyserNode = audioContext.createAnalyser();
     analyserNode.fftSize = 2048;
@@ -164,6 +173,20 @@ function gotStream(stream) {
     zeroGain.gain.value = 0.0;
     inputPoint.connect( zeroGain );
     zeroGain.connect( audioContext.destination );
+    updateAnalysers();
+}
+
+function gotStream(stream) {
+    realAudioInput = audioContext.createMediaStreamSource(stream);
+
+    analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 2048;
+    realAudioInput.connect( analyserNode );
+
+    //var oscillator = audioContext.createOscillator();
+    //oscillator.connect(realAudioInput);
+    
+    audioRecorder = new Recorder( realAudioInput );
     updateAnalysers();
 }
 
@@ -180,9 +203,12 @@ function initAudio() {
             "audio": {
                 "mandatory": {
                     "googEchoCancellation": "false",
+                    "googEchoCancellation2": "false",
                     "googAutoGainControl": "false",
                     "googNoiseSuppression": "false",
-                    "googHighpassFilter": "false"
+                    "googNoiseSuppression2": "false",
+                    "googHighpassFilter": "false",
+                    "googTypingNoiseDetection": "false"
                 },
                 "optional": []
             },

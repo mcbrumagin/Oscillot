@@ -79,6 +79,7 @@ function mergeBuffers(recBuffers, recLength){
     result.set(recBuffers[i], offset);
     offset += recBuffers[i].length;
   }
+  //console.info('Hell yeah!', result.slice(0,100))
   return result;
 }
 
